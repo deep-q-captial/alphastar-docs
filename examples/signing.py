@@ -28,7 +28,7 @@ def sign_auth_headers():
     """
     Generates the signed auth headers required to authenticate with the
     AlphaStar API. The headers include the wallet address, the current
-    timestamp (in seconds, as an int) and a signature of the timestamp.
+    timestamp (Unix time, in seconds, as an int) and a signature of the timestamp.
     """
 
     # Get account to sign with
