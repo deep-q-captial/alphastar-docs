@@ -1,10 +1,8 @@
-import json
 import os
 from time import time
 
 from dotenv import load_dotenv
 from eth_account.messages import encode_defunct
-from hexbytes import HexBytes
 from web3 import Account
 
 account = None
