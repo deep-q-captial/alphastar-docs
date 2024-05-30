@@ -106,7 +106,5 @@ def approve(deposit_amount: Decimal, currency: str):
     print(f"Approval transaction done, success={bool(int(receipt['status'], 16))}")
 
 
-# Main
-
 if __name__ == "__main__":
     approve(Decimal("2.3"), "WETH")
