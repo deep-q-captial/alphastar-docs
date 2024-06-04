@@ -40,11 +40,12 @@ fabric.properties
 # Ignore Python compiled files
 *.pyo
 *.pyd
+*.pyc
+
 # Ignore all __pycache__ directories
 __pycache__/
 **/__pycache__/
 .ipynb_checkpoints
-*.pyc
 
 # Tests
 .pytest_cache
