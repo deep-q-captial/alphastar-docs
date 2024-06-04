@@ -24,16 +24,15 @@ def get_account() -> Account:
     return account
 
 
-def sign_auth_headers():
+def sign_auth_headers(account=None):
     """
     Generates the signed auth headers required to authenticate with the
     AlphaStar API. The headers include the wallet address, the current
     timestamp (Unix time, in seconds, as an int) and a signature of the timestamp.
     """
-
-    # Get account to sign with
-    account = get_account()
-
+    if account is None:
+        account = get_account()
+    
     # Sign current timestamp in seconds
     timestamp = int(time())
     data_encoded = encode_defunct(text=str(timestamp))
