@@ -1,4 +1,4 @@
-# AlphaStart Documentation
+# DCN-alpha Documentation
 
 Documentation and examples for AlphaStar.
 
