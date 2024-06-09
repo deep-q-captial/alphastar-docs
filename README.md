@@ -1,6 +1,7 @@
 # AlphaStar Documentation
 Alphastar is a decentralized electronic communication network that allows market participants to engage in "over-the-counter" (OTC) trading of digital assets. The platform is designed to allow on-chain traders access to insitutional style OTC trading with the benefits of a decentralized exchange. 
 
+
 This document provides an overview of the AlphaStar platform, including the architecture, message types, and examples of how to interact with the platform.
 
 In this repository you will also find sample code which demonstrate how to interact with the platform using the REST API and Websockets.
