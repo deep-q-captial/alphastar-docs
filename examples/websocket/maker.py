@@ -27,9 +27,9 @@ class MakerClient(WebSocketClient):
         self.valid_until_time = valid_until_time
 
         # Market making parameters
-        self.true_mid = Decimal('100.00')
+        self.true_mid = Decimal('0.10')
         self.true_mu = 0
-        self.true_sigma = 0.20
+        self.true_sigma = 0.001
         
         # Quote time generation
         self.quote_every_sec = 5
@@ -37,8 +37,8 @@ class MakerClient(WebSocketClient):
         self.quote_every_sigma = 2
 
         # Quote randomised bid/ask spread generation
-        self.spread_mu = 0.05
-        self.spread_sigma = 0.01
+        self.spread_mu = 0.001
+        self.spread_sigma = 0.0001
 
         # NOTE: Sizes are fixed per stream see liquidity_levels REST endpoint
         self.size_premium = {
