@@ -383,9 +383,9 @@ We provide a couple of basic examples to get you started and see how you might b
 
 We use websocket endpoints for you to connect to and send/receive messages. There are three of interest and we provide code exmaple of how one might interact with them.
 ```python  
-ws://localhost:8000/ws/marketdata
-ws://localhost:8000/ws/maker
-ws://localhost:8000/ws/taker
+ws://dcn.alpha.deepqdigital.net/ws/marketdata
+ws://dcn.alpha.deepqdigital.net/ws/maker
+ws://dcn.alpha.deepqdigital.net/ws/taker
 ```
 
 ## REST endpoints

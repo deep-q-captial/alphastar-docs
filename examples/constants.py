@@ -1,5 +1,7 @@
 CLEARINGHOUSE = "0x3cD256A997E71B4eBC8B133eFeB68fF24AC835e9"
 
+URL = "dcn.alpha.deepqdigital.net"
+
 TOKENS = {
     "WETH": {
         "address": "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",

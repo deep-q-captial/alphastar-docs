@@ -3,6 +3,7 @@ import os
 from web3 import Account
 
 from examples.signing import sign_auth_headers
+from examples.constants import URL
 from examples.websocket.base import WebSocketClientManager
 from examples.websocket.maker import MakerClient
 
@@ -17,7 +18,7 @@ def main():
 
     # Create a MakerClient that can publish Quotes
     maker_client = MakerClient(
-        uri="ws://localhost:8000/ws/maker",
+        uri=f"ws://{URL}/ws/maker",
         headers=headers,
         pool_id="ETH-USD_common",
     )

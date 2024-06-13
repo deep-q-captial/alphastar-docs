@@ -3,6 +3,7 @@ import os
 from web3 import Account
 
 from examples.signing import sign_auth_headers
+from examples.constants import URL
 from examples.websocket.base import WebSocketClientManager
 from examples.websocket.marketdata import MarketDataClient
 from examples.websocket.taker import OrderClient
@@ -19,13 +20,13 @@ def main():
 
     # Create an OrderClient that can act on market data and place orders and listen for trades
     order_client = OrderClient(
-        uri="ws://localhost:8000/ws/taker",
+        uri=f"ws://{URL}/ws/taker",
         headers=headers
     )
 
     # Set the order client to handle responses from the market data client
     market_data_client = MarketDataClient(
-        uri="ws://localhost:8000/ws/mktdata",
+        uri=f"ws://{URL}/ws/mktdata",
         headers=headers,
         message_handler=order_client.handle_quote
     )
