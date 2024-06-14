@@ -27,7 +27,7 @@ class MakerClient(WebSocketClient):
         self.valid_until_time = valid_until_time
 
         # Market making parameters
-        self.true_mid = Decimal('0.10')
+        self.true_mid = Decimal('1.0')
         self.true_mu = 0
         self.true_sigma = 0.001
         
@@ -64,7 +64,7 @@ class MakerClient(WebSocketClient):
             await asyncio.sleep(random.gauss(self.quote_every_mu, self.quote_every_sigma))
 
             bid = self.true_mid - Decimal(f"{max(0, random.gauss(self.spread_mu, self.spread_sigma)):.2f}")
-            bids = [f"{bid + size_premium:.2f}" for size_premium in self.size_premium.values()]
+            bids = [f"{bid - size_premium:.2f}" for size_premium in self.size_premium.values()]
             ask = self.true_mid + Decimal(f"{max(0, random.gauss(self.spread_mu, self.spread_sigma)):.2f}")
             asks = [f"{ask + size_premium:.2f}" for size_premium in self.size_premium.values()]
             
@@ -88,17 +88,37 @@ class MakerClient(WebSocketClient):
         Args:
             message (str): The incoming WebSocket message.
         """
-
         data = json.loads(message)
         message_type = data.get('type')
         message = json.loads(data["data"])
 
         if message_type == 'makertrademessage':
             await self.handle_maker_trade(message)
+        elif message_type == 'quotereject':
+            await self.handle_quote_reject(message)
         else:
             await self.handle_unknown(data)
 
-    async def handle_maker_trade(self, data):
+    async def handle_quote_reject(self, data: dict):
+        """Handle a quote reject due to bad parameters.
+        
+        Args (dict): the quote reject message data.
+
+
+        QuoteReject message:
+        {
+            "type": "quotereject",
+            "data": {
+                "quote_id": "str",
+                "wallet_id": "str",
+                "pool_id": "str",
+                "msg": "str"
+            }
+        }
+        """
+        print(f"Quote rejected: {data}")
+
+    async def handle_maker_trade(self, data: dict):
         """Handle trade messages from takers.
 
         Args:
@@ -110,7 +130,7 @@ class MakerClient(WebSocketClient):
             2. The MM responds with a status=ACCEPT or status=REJECTED
             3. The MM is informed of the status of the trade with status=DONE or status=NOT_DONE
         
-        makertrademessage:
+        MakerTradeMessage message:
         {
             "type": "takertrademessage",
             "data": {
@@ -158,7 +178,7 @@ class MakerClient(WebSocketClient):
 
         elif data["status"] in ["DONE", "NOT_DONE"]:
             pass # Process fills or ignore rejects
-
+        
     async def connect(self):
         """Connect to the WebSocket server and run the market making simulations.
         """
