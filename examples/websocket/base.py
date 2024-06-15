@@ -2,12 +2,15 @@ import asyncio
 import websockets
 import time
 from typing import Any
+import logging
+
+logger = logging.getLogger(__name__)    
 
 
 class WebSocketClient:
     """Base class for WebSocket clients that connect to a server and handle messages.
     """ 
-    def __init__(self, uri, headers):
+    def __init__(self, uri, headers, max_retries=5, retry_delay=5):
         self.uri = uri
         self.headers = headers
         self.wallet = headers.get("wallet")
@@ -15,15 +18,33 @@ class WebSocketClient:
             raise ValueError("Wallet address is required as part of Header for authentication")
         self.websocket = None
         self.last_heartbeat = time.time()
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
 
     async def connect(self):
-        async with websockets.connect(self.uri, extra_headers=self.headers) as websocket:
-            self.websocket = websocket
-            await self.handle_messages(websocket)
+        retry_count = 0
+        while retry_count < self.max_retries:
+            try:
+                async with websockets.connect(self.uri, extra_headers=self.headers) as websocket:
+                    self.websocket = websocket
+                    retry_count = 0  # Reset the retry count on successful connection
+                    await self.handle_messages(websocket)
+            except (websockets.exceptions.ConnectionClosedError, websockets.exceptions.InvalidURI) as e:
+                logging.error(f"Connection closed with error: {e}. Retrying in {self.retry_delay} seconds...")
+                retry_count += 1
+                await asyncio.sleep(self.retry_delay)
+            except Exception as e:
+                logging.error(f"Exception during client execution: {e}")
+                break  # Break the loop on other exceptions
 
     async def handle_messages(self, websocket):
-        async for message in websocket:
-            await self.handle_message(message)
+        try:
+            async for message in websocket:
+                await self.handle_message(message)
+        except websockets.exceptions.ConnectionClosedError as e:
+            logger.error(f"Connection closed with error. Reconnecting...", exc_info=True)
+        except Exception as e:
+            logger.error(f"Exception during message handling", exc_info=True)
 
     async def handle_message(self, message: Any):
         raise NotImplementedError("This method should be overridden by subclasses")
