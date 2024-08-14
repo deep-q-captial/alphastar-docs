@@ -107,4 +107,4 @@ def approve(deposit_amount: Decimal, currency: str):
 
 
 if __name__ == "__main__":
-    approve(Decimal("2.3"), "WETH")
+    approve(Decimal("2.3"), "ALPHA")

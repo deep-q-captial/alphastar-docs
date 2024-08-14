@@ -12,6 +12,14 @@ TOKENS = {
         "address": "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
         "decimals": 6
     },
+    "DCN": {
+        "address": "0x962E3C3C816E45feA4e21c99f6727a7EAb1Fc6B1",
+        "decimals": 18
+    },
+    "ALPHA": {
+        "address": "0x2231Dd7B0aE1238c95a31Ccab6811F5170DE859c",
+        "decimals": 18
+    }
 }
 
 ARBITRUM_SEPOLIA_CHAIN_ID = 421614
