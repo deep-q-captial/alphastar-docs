@@ -57,8 +57,8 @@ def approve(deposit_amount: Decimal, currency: str):
     # Create and sign transaction
     account = get_account()
     transaction = {
-        "gas": 1_000_000,
-        "gasPrice": 2_000_000_000,
+        "gas": 2_000_000,
+        "gasPrice": 3_000_000_000,
         "nonce": get_nonce(account.address),
         "to": TOKENS[currency]["address"],
         "value": hex(0),
@@ -94,7 +94,7 @@ def approve(deposit_amount: Decimal, currency: str):
             "params": [transaction_hash]
         }
         response = requests.post(RPC_URL, json=request)
-
+        print(response.json())
         if response.status_code == 200:
             response = response.json()
 
@@ -107,4 +107,5 @@ def approve(deposit_amount: Decimal, currency: str):
 
 
 if __name__ == "__main__":
-    approve(Decimal("2.3"), "WETH")
+    print(f"Sending DCN approval...")
+    approve(Decimal("10000"), "DCN")

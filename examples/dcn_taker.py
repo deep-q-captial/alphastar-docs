@@ -19,12 +19,14 @@ def main():
     print(f"Headers: {headers}")
 
     # Create an OrderClient that can act on market data and place orders and listen for trades
+    print(f"setting up order client with uri: ws://{URL}/ws/taker")
     order_client = OrderClient(
         uri=f"ws://{URL}/ws/taker",
         headers=headers
     )
 
     # Set the order client to handle responses from the market data client
+    print(f"setting up MarketDataClient...")
     market_data_client = MarketDataClient(
         uri=f"ws://{URL}/ws/mktdata",
         headers=headers,
@@ -32,6 +34,7 @@ def main():
     )
 
     # Add the clients to the manager
+    print(f"adding clients to manager...")
     manager = WebSocketClientManager()
     manager.add_client('marketdata', market_data_client)
     manager.add_client('taker', order_client)

@@ -35,9 +35,9 @@ class OrderClient(WebSocketClient):
                 "type": "marketdata",
                 "data": {
                     'timestamp': 1.1, 
-                    'pool_id': 'ETH-USD_common', 
+                    'pool_id': 'DCN-ALPHA_common', 
                     'sequence_number': 300, 
-                    'symbol': 'ETH-USD', 
+                    'symbol': 'DCN-ALPHA', 
                     'bids': ['100', '99', '98', '97', '96', '95'], 
                     'offers': ['101', '102', '103', '104', '105', '106'], 
                     'sizes': ['0.1', '0.5', '1', '5', '10', '20']
@@ -48,18 +48,18 @@ class OrderClient(WebSocketClient):
             {
                 "type": "quoteresponse",
                 "data": {
-                    'pool_id': 'ETH-USD_common', 
+                    'pool_id': 'DCN-ALPHA_common', 
                     'price': '99.99', 
                     'quantity': '0.1', 
                     'quote_resp_id': 'quote_response_id', 
                     'side': 'SELL', 
-                    'symbol': 'ETH-USD', 
+                    'symbol': 'DCN-ALPHA', 
                     'sending_time': 1712784773.339189, 
                     'wallet_id': 'taker_wallet'
                 }
             }
         """
-        await asyncio.sleep(2.5)  # Simulate decision time
+        await asyncio.sleep(0.5)  # Simulate decision time
         print(f"Data info: type(data)={type(data)} - {data}")
         bid_price = data['bids'][0]
         ask_price = data['offers'][0]
@@ -73,12 +73,12 @@ class OrderClient(WebSocketClient):
         quote_response = {
             "type": "quoteresponse",
             "data": {
-                'pool_id': 'ETH-USD_common', 
+                'pool_id': 'DCN-ALPHA_common', 
                 'price': price, 
                 'quantity': quantity,
                 'quote_resp_id': str(uuid.uuid4()), 
                 'side': side, 
-                'symbol': 'ETH-USD', 
+                'symbol': 'DCN-ALPHA', 
                 'sending_time': self.now, 
                 'wallet_id': self.wallet
             }
@@ -96,13 +96,13 @@ class OrderClient(WebSocketClient):
                     'maker_wallet_id': '', 
                     'match_timestamp': 1712784337.795921, 
                     'msg': 'Trade Miss: Price BUY is less than the best offer price 100.85', 
-                    'pool_id': 'ETH-USD_common', 
+                    'pool_id': 'DCN-ALPHA_common', 
                     'price': '100.77', 
                     'quantity': '0.1', 
                     'quote_id': 'quote_response_id', 
                     'side': 'BUY',
                     'status': 'REJECT', 
-                    'symbol': 'ETH-USD', 
+                    'symbol': 'DCN-ALPHA', 
                     'taker_fee': '0.0', 
                     'taker_fee_ccy': 'USD', 
                     'taker_timestamp': 1712784337.795392, 

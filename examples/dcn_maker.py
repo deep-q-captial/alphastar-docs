@@ -20,7 +20,7 @@ def main():
     maker_client = MakerClient(
         uri=f"ws://{URL}/ws/maker",
         headers=headers,
-        pool_id="ETH-USD_common",
+        pool_id="DCN-ALPHA_common",
     )
 
     # Add the clients to the manager

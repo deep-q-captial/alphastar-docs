@@ -12,7 +12,7 @@ class MakerClient(WebSocketClient):
     """A WebSocket client for simulating a market maker.
     """
 
-    def __init__(self, uri, headers, pool_id: str = "ETH-USD_common", valid_until_time: int = 5) :
+    def __init__(self, uri, headers, pool_id: str = "DCN-ALPHA_common", valid_until_time: int = 5) :
         """
         Initialize the MakerClient with given parameters.
 
@@ -29,7 +29,7 @@ class MakerClient(WebSocketClient):
         # Market making parameters
         self.true_mid = Decimal('1.0')
         self.true_mu = 0
-        self.true_sigma = 0.001
+        self.true_sigma = 0.01
         
         # Quote time generation
         self.quote_every_sec = 5
@@ -42,12 +42,12 @@ class MakerClient(WebSocketClient):
 
         # NOTE: Sizes are fixed per stream see liquidity_levels REST endpoint
         self.size_premium = {
-            "0.1": Decimal("0.0"), 
-            "0.5": Decimal("0.01"), 
-            "1": Decimal("0.02"), 
+            "1": Decimal("0.0"), 
+            "2": Decimal("0.01"), 
+            "3": Decimal("0.02"), 
             "5": Decimal("0.05"), 
             "10": Decimal("0.10"), 
-            "20": Decimal("0.15")
+            "20": Decimal("0.20")
         }
 
     async def simulate_true_mid(self):       
