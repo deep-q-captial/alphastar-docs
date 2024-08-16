@@ -19,17 +19,18 @@ In order to access the Alphastar platform, you will need to whitelist your IP ad
 
 
 ## 3. Deposit funds into the Alphastar smart contract
-Alphastar is a non-custodial protocol that requires 100% collateralization of funds prior to trading. In order to trade on the platform, you will need to deposit funds into the Alphastar smart contract. The smart contract is deployed on the Arbitrum testnet and supports the following tokens:
-- WETH
-- USDC
+Alphastar is a non-custodial protocol that requires 100% collateralization of funds prior to trading. In order to trade on the platform, you will need to deposit funds into the Alphastar smart contract. The smart contract is deployed on the Arbitrum Sepolia testnet. To facilitate trading we have created the tokens 'DCN' and 'ALPHA' to trade as the 'DCN-ALPHA' symbol. Please provide your wallet address to the Alphastar team so that we can deposit funds into your account.
 
-You first need to approve an amount of a token to deposit to the DCN smart contract (see what vertex write here too same process)
+You first need to approve an amount of a token to deposit to the DCN smart contract.
 - example deposit approval script in `examples/approve.py`
-- `examples/constants.py` contains information about which tokens you can deposit currently on TestNet only USDC and WETH are supported
+- `examples/constants.py` contains information about which tokens you can deposit currently on TestNet only DCN and ALPHA are available.
+
+Secondly, you must deposit the approved amount to the DCN smart contract.
+- example deposit script in `examples/deposit.py`
 
 # MAKING ON ALPHASTAR
 ## Pools
-A pool is simply a matching engine in which market makers stream indicative quotes for a single trading pair, and those quotes are matched with taker orders. Pools may be public or private, and may be configured to allow or disallow specific taker addresses. In Testnet we have a single pool, 'WETH-USDC-common' which is a public pool that allows any whitelisted wallet to make or take on it. 
+A pool is simply a matching engine in which market makers stream indicative quotes for a single trading pair, and those quotes are matched with taker orders. Pools may be public or private, and may be configured to allow or disallow specific taker addresses. In Testnet we have a single pool, 'DCN-ALPHA_common' which is a public pool that allows any whitelisted wallet to make or take on it. 
 
 The matching logic is based on price/time priority, meaning that the first order to be received at a given price level will be the first to be matched. In future versions of alphastar, all public wallets will continue with price/time priority, but private pools may be configured to use other matching logic that rewards specific behaviors such as expected market impact, price improvement, reject rates, etc.
 
@@ -72,7 +73,7 @@ The Quote message is used to stream indicative quotes to the pool. These quotes 
       "sending_time": time.time(),    # unix timestamp in seconds as a float
       "quote_id": "abcd1234",         # client generated unique identifier for the quote as a string
       "wallet_id": "0x1234",          # wallet address of the maker as a string
-      "pool_id": "WETH-USDC-common",  # pool id as a string
+      "pool_id": "DCN-ALPHA_common",  # pool id as a string
       "bid_px": ["99.99", "99.98", "99.97", "99.96", "99.95", "99.94"],  # list of bid prices as strings
       "offer_px": ["100.01", "100.02", "100.03", "100.04", "100.05", "100.06"],  # list of offer prices as strings
       "valid_until_time": 5.0,       # time in seconds until the quote is considered stale as a float
@@ -87,15 +88,15 @@ When a maker sends the quote message, they will populate two fields.
     - "sending_time": the UTC timestamp in seconds when the quote was sent as a float
     - "quote_id": a client generated unique identifier for the quote as a string -- this is a convenience to the maker to allow them to identify their quotes in the event of a quote reject or maker trade message
     - "wallet_id": the wallet address of the maker as a string. This must be the wallet ID of the maker that was registered with the platform
-    - "pool_id": the pool id as a string. In testnet, this will be "WETH-USDC-common"
-    - "bid_px": a list of bid prices as strings. Each pool has a fixed number of rungs of liquidity, and the maker must provide a price for each rung. In testnet, the rungs of liquidity are [0.1, 0.5, 1, 5, 10, 20] WETH respectively. If the maker does not wish to provide liquidity at a given price level, they may set the price to "0.0". Finally, prices should be interpreted as the full-amount price the maker is willing to buy or sell up to the amount for that rung of liquidity. 
+    - "pool_id": the pool id as a string. In testnet, this will be "DCN-ALPHA_common"
+    - "bid_px": a list of bid prices as strings. Each pool has a fixed number of rungs of liquidity, and the maker must provide a price for each rung. In testnet, the rungs of liquidity are [1, 2, 3, 5, 10, 20] DCN respectively. If the maker does not wish to provide liquidity at a given price level, they may set the price to "0.0". Finally, prices should be interpreted as the full-amount price the maker is willing to buy or sell up to the amount for that rung of liquidity. 
     - "offer_px": a list of offer prices as strings. (see bid_px for more information)
     - "valid_until_time": the time in seconds until the quote is considered stale as a float. Once the sending_time + valid_until_time has been reached the quote will be removed from the pool. The maximum time a quote can be valid for depends on the pool configuration. In testnet, the maximum time a quote can be valid for is 5 seconds.
 
 Note. There is no cancel quote message. If a maker wishes to remove their quotes from the pool, they may either wait for their quotes to expire or send a new quote message with the bid_px and offer_px set to "0.0".
 
 A note on matching methodology:
-the price quoted will be the full-amount price the maker is willing to buy or sell up to the amount for that rung of liquidity. There is no sweeping of liquidity, so if a taker order is placed for 1.0 WETH the order will be filled at the best price available for 1.0 WETH. If the order is for 8.0 WETH, the order will be filled at the best price available for 10.0 WETH. The trade will be given in full to the maker whose price the taker order is matched with. This ensures that the market maker is not penalized for the risk management of other market makers when they win a trade. 
+the price quoted will be the full-amount price the maker is willing to buy or sell up to the amount for that rung of liquidity. There is no sweeping of liquidity, so if a taker order is placed for 1.0 DCN the order will be filled at the best price available for 1.0 DCN. If the order is for 8.0 DCN, the order will be filled at the best price available for 10.0 DCN. The trade will be given in full to the maker whose price the taker order is matched with. This ensures that the market maker is not penalized for the risk management of other market makers when they win a trade. 
 
 
 ## Maker QuoteReject Message
@@ -108,7 +109,7 @@ The QuoteReject message is used to inform the maker that their quote has been re
       "sending_time": time.time(),   # unix timestamp in seconds as a float
       "quote_id": "abcd1234",        # client generated unique identifier for the quote as a string provided in the originating quote
       "wallet_id": "0x1234",         # wallet address of the maker as a string provided in the originating quote
-      "pool_id": "WETH-USDC-common", # pool id as a string provided in the originating quote
+      "pool_id": "DCN-ALPHA_common", # pool id as a string provided in the originating quote
       "reason": "quote_expired"      # reason for the quote rejection as a string
     }
 }
@@ -131,8 +132,8 @@ The MakerTradeMessage is the primary message that the maker will receive from du
     "timestamp": time.time(),  # unix timestamp in seconds as a float. The time the message was sent
     "match_timestamp": time.time(), # unix timestamp in seconds as a float. The time the taker order and maker quote were matched in the pool
     "wallet_id": "0x1234",    # wallet address of the maker as a string
-    "pool_id": "WETH-USDC-common",  # pool id as a string
-    "symbol": "WETH-USDC",    # trading pair as a string -- in testnet will always be WETH-USDC
+    "pool_id": "DCN-ALPHA_common",  # pool id as a string
+    "symbol": "DCN-ALPHA",    # trading pair as a string -- in testnet will always be DCN-ALPHA
     "trade_id": 1,           # unique identifier for the trade as an integer -- assigned by the matching engine on trade match
     "taker_wallet_id": "0x5678",  # wallet address of the taker as a string
     "side": "BUY",          # side of the trade as a string -- BUY or SELL
@@ -144,7 +145,7 @@ The MakerTradeMessage is the primary message that the maker will receive from du
     "quote_created_at": time.time(),  # unix timestamp in seconds as a float. The time the maker quote was accepted into the pool matching engine
     "valid_until_time": 5.0,     # time in seconds until the quote is considered stale as a float, taken from the maker quote
     "maker_fee": "0.0",          # the maker fee amount on the trade in maker_fee_ccy terms as a string
-    "maker_fee_ccy": "USDC",     # the maker fee currency as a string -- for testnet will always be USDC
+    "maker_fee_ccy": "ALPHA",     # the maker fee currency as a string -- for testnet will always be ALPHA
     "executed_quantity": "0.75", # the quantity of the trade that was executed as a string
     "executed_price": "100.0",   # the price of the trade that was executed as a string
     "status": "PENDING"          # the status of the trade as a string -- REQUEST, ACCEPT, REJECT, DONE, NOT_DONE
@@ -157,8 +158,8 @@ The MakerTradeMessage will always have the type "makertrademessage" and the "dat
 - "timestamp": the UTC timestamp in seconds when the message was sent as a float
 - "match_timestamp": the UTC timestamp in seconds when the taker order and maker quote were matched in the pool as a float
 - "wallet_id": the wallet address of the maker as a string. This must be the wallet ID of the maker that was registered with the platform
-- "pool_id": the pool id as a string. In testnet, this will be "WETH-USDC-common"
-- "symbol": the trading pair as a string. In testnet, this will always be "WETH-USDC"
+- "pool_id": the pool id as a string. In testnet, this will be "DCN-ALPHA_common"
+- "symbol": the trading pair as a string. In testnet, this will always be "DCN-ALPHA"
 - "trade_id": a unique identifier for the trade as an integer. This is assigned by the matching engine on trade match
 - "taker_wallet_id": the wallet address of the taker as a string. 
 - "side": the side of the trade as a string. This will be either "BUY" or "SELL"
@@ -170,7 +171,7 @@ The MakerTradeMessage will always have the type "makertrademessage" and the "dat
 - "quote_created_at": the UTC timestamp in seconds when the maker quote was accepted into the pool matching engine as a float
 - "valid_until_time": the time in seconds until the quote is considered stale as a float. This is the valid_until_time that the maker provided in the Quote message.
 - "maker_fee": the maker fee amount on the trade in maker_fee_ccy terms as a string. This is the maker fee that will be charged to the maker if the trade is executed.
-- "maker_fee_ccy": the maker fee currency as a string. For testnet, this will always be "USDC"
+- "maker_fee_ccy": the maker fee currency as a string. For testnet, this will always be "ALPHA"
 - "executed_quantity": the quantity of the trade that was executed as a string. This is the quantity that was matched between the taker and the maker.
 - "executed_price": the price of the trade that was executed as a string. The matching engine will always match the taker with the best price that is available in the pool that is equal to or better than the requested price of the taker. If the maker has provided liquidity at a better price than the requested price of the taker, the maker has the choice to either fill the trade at the requested price of the taker OR to price improve the taker trade. Price improvement will be tracked and stored as a metric in maker analytics. If the maker attempts to fill the trade at a price that is worse than the requested price of the taker, the trade will be rejected and the maker will be credited with a REJECT in its maker analytics profile.
 - "status": the status of the trade as a string. This will be one of the following values: 
@@ -254,21 +255,21 @@ The `MarketData` message will have the following format:
         'timestamp': 1.1,  # UTC timestamp in seconds as a float. The time the quote was updated in the pool.
         'pool_id': 'ETH-USD_common',  # pool id as a string
         'sequence_number': 300,       # sequence number of the quote as an integer -- system generated
-        'symbol': 'WETH-USDC',        # trading pair as a string
+        'symbol': 'DCN-ALPHA',        # trading pair as a string
         'bids': ['100', '99', '98', '97', '96', '95'],  # list of bid prices as strings
         'offers': ['101', '102', '103', '104', '105', '106'],  # list of offer prices as strings
-        'sizes': ['0.1', '0.5', '1', '5', '10', '20']  # corresponding sizes in ccy0 terms (WETH in testnet) as strings
+        'sizes': ['0.1', '0.5', '1', '5', '10', '20']  # corresponding sizes in ccy0 terms (DCN in testnet) as strings
     }
 }
 ```
 The MarketData message will always have the type "marketdata" and the "data" field will contain a dictionary with the following fields:
 - "timestamp": the UTC timestamp in seconds when the quote was updated in the pool as a float. This is the time the pool accepted the quote from the maker.
-- "pool_id": the pool id as a string. In testnet, this will be "WETH-USDC-common"
+- "pool_id": the pool id as a string. In testnet, this will be "DCN-ALPHA_common"
 - "sequence_number": the sequence number of the quote as an integer. This is a system generated field that is used to track the order of quotes in the pool.
-- "symbol": the trading pair as a string. In testnet, this will always be "WETH-USDC"
-- "bids": a list of bid prices as strings. Each pool has a fixed number of rungs of liquidity, and the taker is shown the best price available at that time for each rung of liquidity. In testnet, the rungs of liquidity are [0.1, 0.5, 1, 5, 10, 20] WETH respectively. If there is no liquidity available at a given price level, the price will be set to "0.0". 
+- "symbol": the trading pair as a string. In testnet, this will always be "DCN-ALPHA"
+- "bids": a list of bid prices as strings. Each pool has a fixed number of rungs of liquidity, and the taker is shown the best price available at that time for each rung of liquidity. In testnet, the rungs of liquidity are [0.1, 0.5, 1, 5, 10, 20] DCN respectively. If there is no liquidity available at a given price level, the price will be set to "0.0". 
 - "offers": a list of offer prices as strings. (see bids for more information)
-- "sizes": a list of corresponding sizes in ccy0 terms (WETH in testnet) as strings. The size is the amount of liquidity available at each price level. If there is no liquidity available at a given price level, the size will be set to "0.0".
+- "sizes": a list of corresponding sizes in ccy0 terms (DCN in testnet) as strings. The size is the amount of liquidity available at each price level. If there is no liquidity available at a given price level, the size will be set to "0.0".
 
 ## Taker Order websocket connection
 In order to connect to the Alphastar taker websocket, you will need to subscribe to the following endpoint:
@@ -293,7 +294,7 @@ If a taker wishes to place an order based on the indicative quotes shown to them
         'quantity': '0.1', 
         'quote_resp_id': 'quote_response_id', 
         'side': 'SELL', 
-        'symbol': 'WETH-USDC', 
+        'symbol': 'DCN-ALPHA', 
         'sending_time': 1712784773.339189, 
         'wallet_id': 'taker_wallet'
     }
@@ -301,17 +302,17 @@ If a taker wishes to place an order based on the indicative quotes shown to them
 ```
 
 Takers will always buy on the offer price and sell on the bid price. The `QuoteRequest` message will always have the type "quoteresponse" and the "data" field will contain a dictionary with the following fields:
-- "pool_id": the pool id as a string. In testnet, this will be "WETH-USDC-common"
+- "pool_id": the pool id as a string. In testnet, this will be "DCN-ALPHA_common"
 - "price": the price of the order as a string. This is the price that the taker is requesting to trade at. 
-    - Prices should be interpreted as "full-amount", meaning if a taker wishes to buy 1.0 WETH, they will request the price shown at the 1.0 rung of liquidity rather than adding up the previous rungs of liquidity to get the price.
-    - There are no partial fills. All orders are "Fill or Kill" orders. If the taker requests 1.0 WETH, they will receive 1.0 WETH at the price they requested or better OR they will have their trade rejected.
+    - Prices should be interpreted as "full-amount", meaning if a taker wishes to buy 1.0 DCN, they will request the price shown at the 1.0 rung of liquidity rather than adding up the previous rungs of liquidity to get the price.
+    - There are no partial fills. All orders are "Fill or Kill" orders. If the taker requests 1.0 DCN, they will receive 1.0 DCN at the price they requested or better OR they will have their trade rejected.
     - If the taker requests a price that is not available in the pool, the trade will be rejected.
 - "quantity": the quantity of the order as a string. This is the quantity that the taker is requesting to trade.
     - The quantity requested may be any number greater than 0 and less than or equal to the maximum quantity available in the pool.
     - If the quantity requested is in-between two rungs of liquidity, round up to the next rung of liquidity.
 - "quote_resp_id": a client generated unique identifier for the order as a string. This is a convenience to the taker to allow them to identify their orders in the event of a trade confirmation or rejection.
 - "side": the side of the trade as a string. This will be either "BUY" or "SELL"
-- "symbol": the trading pair as a string. In testnet, this will always be "WETH-USDC"
+- "symbol": the trading pair as a string. In testnet, this will always be "DCN-ALPHA"
 - "sending_time": the UTC timestamp in seconds when the order was sent as a float
 - "wallet_id": the wallet address of the taker as a string. This must be the wallet ID of the taker that was registered with the platform
 
@@ -335,9 +336,9 @@ The TakerTradeMessage will have the following format:
         'quote_id': 'quote_response_id',  # the quote_response_id of the taker's QuoteResponse message
         'side': 'BUY',  # the side of the trade as a string provided by the taker's QuoteResponse message
         'status': 'REJECT',  # the status of the trade as a string -- ACCEPT, REJECT
-        'symbol': 'WETH-USDC',  # trading pair as a string provided by the taker's QuoteResponse message
+        'symbol': 'DCN-ALPHA',  # trading pair as a string provided by the taker's QuoteResponse message
         'taker_fee': '0.0',  # the taker fee amount on the trade in taker_fee_ccy terms as a string
-        'taker_fee_ccy': 'USDC',  # the taker fee currency as a string -- for testnet will always be USDC
+        'taker_fee_ccy': 'ALPHA',  # the taker fee currency as a string -- for testnet will always be ALPHA
         'taker_timestamp': 1712784337.795392,  # UTC timestamp in seconds as a float. The time the taker order was sent to the pool
         'timestamp': 1712784337.795921,  # UTC timestamp in seconds as a float. The time the message was sent
         'type': 'TRADE_RESPONSE',  # the type of the message as a string -- TRADE_RESPONSE
@@ -353,7 +354,7 @@ The TakerTradeMessage will always have the type "takertrademessage" and the "dat
     - If the trade matched, this will be the wallet address of the maker that was matched with the taker, regardless of whether they accept or reject the trade.
 - "match_timestamp": the UTC timestamp in seconds when the taker order and maker quote were matched in the pool as a float
 - "msg": a system message as a string. This message will provide the taker with information on why the trade was rejected or missed.
-- "pool_id": the pool id as a string. In testnet, this will be "WETH-USDC-common"
+- "pool_id": the pool id as a string. In testnet, this will be "DCN-ALPHA_common"
 - "price": the price of the order as a string. This is the price that the taker requested to trade at.
 - "quantity": the quantity of the order as a string. This is the quantity that the taker requested to trade.
 - "quote_id": the quote_id of the taker's QuoteResponse message. This is the quote_id that the taker provided in the QuoteResponse message.
@@ -361,9 +362,9 @@ The TakerTradeMessage will always have the type "takertrademessage" and the "dat
 - "status": the status of the trade as a string. This will be one of the following values:
     - "ACCEPT": the trade was accepted by the maker and executed. 
     - "REJECT": the trade was rejected by the maker OR the trade missed and was not matched in the pool. 
-- "symbol": the trading pair as a string. In testnet, this will always be "WETH-USDC"
+- "symbol": the trading pair as a string. In testnet, this will always be "DCN-ALPHA"
 - "taker_fee": the taker fee amount on the trade in taker_fee_ccy terms as a string. This fee is deducted from the taker's account when the trade is executed.
-- "taker_fee_ccy": the taker fee currency as a string. For testnet, this will always be "USDC"
+- "taker_fee_ccy": the taker fee currency as a string. For testnet, this will always be "ALPHA"
 - "taker_timestamp": the UTC timestamp in seconds when the taker order was sent to the pool as a float
 - "timestamp": the UTC timestamp in seconds when the message was sent as a float
 - "type": the type of the message as a string. This will always be "TRADE_RESPONSE"

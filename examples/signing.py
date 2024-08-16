@@ -39,4 +39,4 @@ def sign_auth_headers(account=None):
     signed_message = account.sign_message(data_encoded)
 
     # Return headers in correct format
-    return {"wallet": account.address, "timestamp": timestamp, "signature": signed_message.signature.hex()}
+    return {"wallet": account.address, "timestamp": str(timestamp), "signature": signed_message.signature.hex()}
