@@ -7,6 +7,8 @@ import logging
 logger = logging.getLogger(__name__)    
 
 
+
+
 class WebSocketClient:
     """Base class for WebSocket clients that connect to a server and handle messages.
     """ 
@@ -25,7 +27,9 @@ class WebSocketClient:
         retry_count = 0
         while retry_count < self.max_retries:
             try:
+                print(f"Attempting to connect to {self.uri} -- attempt number {retry_count}")
                 async with websockets.connect(self.uri, extra_headers=self.headers) as websocket:
+                    print(f"Connected to {self.uri} with headers: {self.headers}")
                     self.websocket = websocket
                     retry_count = 0  # Reset the retry count on successful connection
                     await self.handle_messages(websocket)
@@ -83,6 +87,7 @@ class WebSocketClientManager:
         self.clients[name] = client
 
     async def start(self):
+        
         self._client_tasks = [asyncio.create_task(client.connect()) for client in self.clients.values()]
         results = await asyncio.gather(*self._client_tasks, return_exceptions=True)
         for result in results:

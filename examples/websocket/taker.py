@@ -4,14 +4,20 @@ import uuid
 import random
 
 import orjson as json
+import requests
 
 from .base import WebSocketClient
+from examples.signing import sign_auth_headers
+
 
 
 class OrderClient(WebSocketClient):
-    def __init__(self, uri, headers, force_buying: bool = False):
+    def __init__(self, uri, account, headers, force_buying: bool = False):
         super().__init__(uri, headers)
         self.force_buying = force_buying
+        self.account = account
+
+        print(f"Balances: {self.get_balances(self.account.address)}")
 
     async def handle_message(self, message):
         data = json.loads(message)
@@ -114,3 +120,13 @@ class OrderClient(WebSocketClient):
         """
         # Handle taker trade messages (filled or rejected)
         print(f"Taker trade message received: {data}")
+
+    def get_balances(self, wallet_id):
+        headers = sign_auth_headers(account=self.account)
+        payload = {
+            'account': wallet_id
+        }
+        response = requests.post(f"https://dcn.alpha.deepqdigital.net/balances", json=payload, headers=headers)
+        response.raise_for_status()
+        return response.json()
+

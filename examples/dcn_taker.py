@@ -22,6 +22,7 @@ def main():
     print(f"setting up order client with uri: ws://{URL}/ws/taker")
     order_client = OrderClient(
         uri=f"ws://{URL}/ws/taker",
+        account=account,
         headers=headers
     )
 
@@ -40,6 +41,7 @@ def main():
     manager.add_client('taker', order_client)
 
     # Run the clients
+    print(f"Running the client...")
     manager.run()
 
 
