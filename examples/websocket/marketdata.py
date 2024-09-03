@@ -25,7 +25,6 @@ class MarketDataClient(WebSocketClient):
             message (str): The incoming WebSocket message.
         """
         data = json.loads(message)
-        print(f"Recieved handle_message: {data}")
         message_type = data.get('type')
         message = json.loads(data["data"])
 

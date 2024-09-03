@@ -23,10 +23,12 @@ Alphastar is a non-custodial protocol that requires 100% collateralization of fu
 
 You first need to approve an amount of a token to deposit to the DCN smart contract.
 - example deposit approval script in `examples/approve.py`
-- `examples/constants.py` contains information about which tokens you can deposit currently on TestNet only DCN and ALPHA are available.
 
 Secondly, you must deposit the approved amount to the DCN smart contract.
 - example deposit script in `examples/deposit.py`
+
+We have created two tokens `DCN` and `ALPHA` to use for testnet. `DCN` is the quote token, and `ALPHA` is the base token, which forms the traded symbol `DCN-ALPHA`. To get an allocation of sample tokens please reach out to the DCN Alpha team. 
+The `examples/constants.py` script contains relevant contract information for testnet token addresses.
 
 # MAKING ON ALPHASTAR
 ## Pools
@@ -180,6 +182,7 @@ The MakerTradeMessage will always have the type "makertrademessage" and the "dat
     - "REJECT": IF the maker chooses to reject the trade, the maker will change the status to REJECT, set executed_quantity to "0.0", and set executed_price to "0.0". They will then send the message back to the pool over the maker websocket.
     - "DONE": The system will send a final confirmation message to the maker to indicate that the trade has been executed with the final trade details. This message should be used as the golden source of truth for the trade execution. The sending of an ACCEPT message does not guarantee that the trade will be executed. 
     - "NOT_DONE": The system will send a final confirmation message to the maker to indicate that the trade has not been executed. The system will provide a reason for the trade not being executed in the `msg` field. The possible paths to a NOT_DONE status are: 1. the maker sends a REJECT message, 2. The maker sends an ACCEPT message where the executed_quantity is not equal to the requested quantity, 3. The maker sends an ACCEPT message where the executed_price is worse than the requested price of the taker.
+    - "ERROR": If there is a system error resulting in no trade, the status will be set to ERROR. The system will provide a reason for the error in the `msg` field.
 
 ## Trade Acceptance
 When a maker receives a MakerTradeMessage with a status of "REQUEST", they have the option to accept or reject the trade. The purpose of this mechanism is to allow the maker to protect themselves from tail risk of large, adverse market moves while quotes/orders are in flight. We do not impose any restrictions on the maker's ability to accept or reject trades, but we do track the maker's acceptance rates, their average time to accept or reject trades, the average price improvement on accepts, and the average cost of rejected trades. These metrics will be used to inform the maker's reputation on the platform and may be used to inform future trading relationships with the maker.

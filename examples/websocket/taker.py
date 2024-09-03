@@ -5,10 +5,11 @@ import random
 
 import orjson as json
 import requests
+import random
 
 from .base import WebSocketClient
 from examples.signing import sign_auth_headers
-
+import time
 
 
 class OrderClient(WebSocketClient):
@@ -17,12 +18,15 @@ class OrderClient(WebSocketClient):
         self.force_buying = force_buying
         self.account = account
 
+        # logging market data messages
+        self.mkt_data_time = 0
+        self.mkt_data_count = 0
+
         print(f"Balances: {self.get_balances(self.account.address)}")
 
     async def handle_message(self, message):
         data = json.loads(message)
         message_type = data.get('type')
-        print(f"Recieved handle_message: {data}")
         message = json.loads(data["data"])
 
         if message_type == 'marketdata':
@@ -65,31 +69,47 @@ class OrderClient(WebSocketClient):
                 }
             }
         """
-        await asyncio.sleep(0.5)  # Simulate decision time
-        print(f"Data info: type(data)={type(data)} - {data}")
-        bid_price = data['bids'][0]
-        ask_price = data['offers'][0]
-        quantity  = data['sizes'][0]
-        side = random.choice(['BUY', 'SELL'])
-        price = bid_price if side == "SELL" else ask_price
-        if self.force_buying:
-            side = "BUY" # FORCE BUY
-            price = 1000  # FORCE PRICE
+        self.mkt_data_count += 1
+        print(f"market update received -- {self.mkt_data_count}")
+        if time.time() - self.mkt_data_time > 60:
+            print(f"Market Updates Processed: {self.mkt_data_count}")
+            self.mkt_data_time = time.time()
+            self.mkt_data_count = 0
 
-        quote_response = {
-            "type": "quoteresponse",
-            "data": {
-                'pool_id': 'DCN-ALPHA_common', 
-                'price': price, 
-                'quantity': quantity,
-                'quote_resp_id': str(uuid.uuid4()), 
-                'side': side, 
-                'symbol': 'DCN-ALPHA', 
-                'sending_time': self.now, 
-                'wallet_id': self.wallet
+        action_percentage = 0.25
+        if random.random() < action_percentage:
+
+            balances = self.get_balances(self.account.address)
+            balances = balances['balances']
+            bid_price = data['bids'][0]
+            ask_price = data['offers'][0]
+            quantity  = data['sizes'][0]
+            side = random.choice(['BUY', 'SELL'])
+            price = bid_price if side == "SELL" else ask_price
+            if self.force_buying:
+                side = "BUY" # FORCE BUY
+                price = 1000  # FORCE PRICE
+
+            quote_response = {
+                "type": "quoteresponse",
+                "data": {
+                    'pool_id': 'DCN-ALPHA_common', 
+                    'price': price, 
+                    'quantity': quantity,
+                    'quote_resp_id': str(uuid.uuid4()), 
+                    'side': side, 
+                    'symbol': 'DCN-ALPHA', 
+                    'sending_time': self.now, 
+                    'wallet_id': self.wallet
+                }
             }
-        }
-        await self.send_message(json.dumps(quote_response))
+            print("---------------------------------------------------")
+            print(f"Trade Initiated: {side} {quantity} @ {price}")
+            print(f"Pre-Trade Balances")
+            print(f"DCN -- contract balance: {balances['DCN']['contract_balance']} | balance: {balances['DCN']['balance']} | in flight: {balances['DCN']['in_flight']} | available: {balances['DCN']['available']}")
+            print(f"ALPHA -- contract balance: {balances['ALPHA']['contract_balance']} | balance: {balances['ALPHA']['balance']} | in flight: {balances['ALPHA']['in_flight']} | available: {balances['ALPHA']['available']}")
+            print("---------------------------------------------------")
+            await self.send_message(json.dumps(quote_response))
 
     async def handle_taker_trade(self, data: dict[str, Any]):
         """
@@ -119,7 +139,14 @@ class OrderClient(WebSocketClient):
             }
         """
         # Handle taker trade messages (filled or rejected)
+        print("---------------------------------------------------")
         print(f"Taker trade message received: {data}")
+        balances = self.get_balances(self.account.address)
+        balances = balances['balances']
+        print(f"Post-Trade Balances")
+        print(f"DCN -- contract balance: {balances['DCN']['contract_balance']} | balance: {balances['DCN']['balance']} | in flight: {balances['DCN']['in_flight']} | available: {balances['DCN']['available']}")
+        print(f"ALPHA -- contract balance: {balances['ALPHA']['contract_balance']} | balance: {balances['ALPHA']['balance']} | in flight: {balances['ALPHA']['in_flight']} | available: {balances['ALPHA']['available']}")
+        print("---------------------------------------------------")
 
     def get_balances(self, wallet_id):
         headers = sign_auth_headers(account=self.account)

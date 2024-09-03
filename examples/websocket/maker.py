@@ -80,6 +80,7 @@ class MakerClient(WebSocketClient):
                     "valid_until_time": self.valid_until_time
                 }
             }
+            print(f"Sending quote -- sending time: {self.now} | bid: {bids[0]} | ask: {asks[0]}")
             await self.send_message(json.dumps(quote))
 
     async def handle_message(self, message):
@@ -170,7 +171,7 @@ class MakerClient(WebSocketClient):
             data["timestamp"] = self.now
             data.update(decision)
             message = {
-                "type": "takertrademessage",
+                "type": "makertrademessage",
                 "data": data
             } 
             await self.send_message(json.dumps(message))
